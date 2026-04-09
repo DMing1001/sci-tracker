@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCI 投稿追踪</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#f7f8fa;--card:#fff;--border:#e5e7eb;--border2:#d1d5db;
+    --text:#111827;--text2:#4b5563;--dim:#9ca3af;
+    --accent:#4f46e5;--accent-bg:#eef2ff;
+    --green:#059669;--green-bg:#ecfdf5;
+    --yellow:#d97706;--yellow-bg:#fffbeb;
+    --orange:#ea580c;--orange-bg:#fff7ed;
+    --red:#dc2626;--red-bg:#fef2f2;
+    --blue:#2563eb;--blue-bg:#eff6ff;
+  }
+  body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+  .header{background:var(--card);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:56px}
+  .header h1{font-size:16px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
+  .header-right{display:flex;gap:6px;align-items:center}
+
+  .btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:13px;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;font-weight:500}
+  .btn:hover{border-color:var(--border2);color:var(--text);background:var(--bg)}
+  .btn-p{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .btn-p:hover{background:#4338ca;border-color:#4338ca}
+  .btn-s{padding:4px 8px;font-size:12px;border-radius:6px}
+  .btn-i{background:transparent;border-color:transparent;color:var(--dim)}
+  .btn-i:hover{color:var(--text);background:rgba(0,0,0,.04)}
+  .btn-d:hover{color:var(--red);border-color:var(--red);background:var(--red-bg)}
+
+  .lang-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .12s;letter-spacing:.3px}
+  .lang-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .lang-btn.active{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+
+  .bar{padding:12px 32px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .tab{padding:5px 14px;border-radius:8px;border:none;background:transparent;color:var(--dim);font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .12s}
+  .tab:hover{color:var(--text);background:rgba(0,0,0,.03)}
+  .tab.on{background:var(--accent-bg);color:var(--accent);font-weight:600}
+  .bar-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
+
+  .wrap{padding:0 32px 32px}
+  table{width:100%;border-collapse:separate;border-spacing:0}
+  thead th{font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--bg);z-index:1;user-select:none}
+  thead th.sortable{cursor:pointer}
+  thead th.sortable:hover{color:var(--text)}
+  tbody tr{transition:background .1s}
+  tbody tr:hover{background:var(--card)}
+  tbody td{padding:14px 12px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:14px}
+
+  .c-st{width:120px}
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap}
+  .pill .d{width:6px;height:6px;border-radius:50%}
+  .p-review{background:var(--yellow-bg);color:var(--yellow)}.p-review .d{background:var(--yellow);animation:blink 2s infinite}
+  .p-complete{background:var(--accent-bg);color:var(--accent)}.p-complete .d{background:var(--accent)}
+  .p-revision{background:var(--orange-bg);color:var(--orange)}.p-revision .d{background:var(--orange)}
+  .p-accepted{background:var(--green-bg);color:var(--green)}.p-accepted .d{background:var(--green)}
+  .p-rejected{background:var(--red-bg);color:var(--red)}.p-rejected .d{background:var(--red)}
+  .p-submitted{background:var(--blue-bg);color:var(--blue)}.p-submitted .d{background:var(--blue)}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .c-title{min-width:200px}
+  .t-main{font-weight:600;font-size:14px;line-height:1.4;cursor:pointer;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .t-main:hover{color:var(--accent)}
+  .t-notes{font-size:12px;color:var(--dim);margin-top:2px;font-style:italic;cursor:pointer;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .t-notes:hover{color:var(--text2)}
+
+  .c-j{width:160px;font-size:13px;color:var(--text2)}
+  .c-id{width:140px;font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+  .c-id .rev{color:var(--accent);font-weight:600}
+  .c-date{width:110px;font-size:13px;color:var(--text2);white-space:nowrap}
+
+  .c-rev{width:130px}
+  .rev-bar{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
+  .rev-bar .rev-fill{height:4px;border-radius:2px;background:var(--green);transition:width .3s}
+  .rev-bar .rev-track{flex:1;height:4px;border-radius:2px;background:var(--border);max-width:60px}
+  .rev-num{font-weight:600;color:var(--text);font-size:13px}
+
+  .c-act{width:80px;text-align:right}
+  .act-group{display:flex;gap:2px;justify-content:flex-end}
+
+  .detail td{padding:0 12px 16px}
+  .detail-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px 20px}
+  .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 24px;font-size:13px}
+  .di .dl{color:var(--dim);display:inline}.di .dv{color:var(--text);margin-left:4px;font-weight:500}
+  .detail-notes{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:var(--text2);cursor:pointer}
+  .detail-notes:hover{color:var(--text)}
+  .detail-link{margin-top:8px;font-size:13px}
+  .detail-link a{color:var(--accent);text-decoration:none;font-weight:500}
+  .detail-link a:hover{text-decoration:underline}
+
+  .empty{text-align:center;padding:80px 20px}
+  .empty h3{font-size:16px;color:var(--text);margin-bottom:6px}
+  .empty p{font-size:14px;color:var(--dim);margin-bottom:16px}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:100}
+  .overlay.show{display:flex}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:520px;max-width:92vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+  .modal h2{font-size:18px;font-weight:700;margin-bottom:20px}
+  .fg{margin-bottom:16px}
+  .fg label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:5px}
+  .fg input,.fg textarea{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border .15s}
+  .fg input:focus,.fg textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+  .fg textarea{resize:vertical;min-height:56px}
+  .fr{display:flex;gap:12px}.fr .fg{flex:1}
+  .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+  .hint{font-size:12px;color:var(--green);margin-top:4px;font-weight:500}
+
+  @media(max-width:900px){
+    .header,.bar,.wrap{padding-left:12px;padding-right:12px}
+    .c-rev,.c-j{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📄 <span id="hTitle">SCI 投稿追踪</span></h1>
+  <div class="header-right">
+    <button class="lang-btn active" id="langCn" onclick="setLang('cn')">中文</button>
+    <button class="lang-btn" id="langEn" onclick="setLang('en')">EN</button>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+    <button class="btn" onclick="refreshAll()" id="rBtn"></button>
+    <button class="btn" onclick="exportData()" id="bExport"></button>
+    <button class="btn" onclick="importData()" id="bImport"></button>
+    <button class="btn btn-p" onclick="openModal()" id="bAdd"></button>
+  </div>
+</div>
+
+<div class="bar" id="bar"></div>
+<div class="wrap"><table><thead id="hd"></thead><tbody id="bd"></tbody></table></div>
+
+<div class="overlay" id="ov" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="mT"></h2>
+    <input type="hidden" id="eId">
+    <div class="fg">
+      <label id="lUrl"></label>
+      <input type="url" id="fUrl" placeholder="" oninput="onUrl(this.value)">
+      <div class="hint" id="fHint" style="display:none"></div>
+    </div>
+    <div class="fg"><label id="lTitle"></label><input type="text" id="fTitle"></div>
+    <div class="fr">
+      <div class="fg"><label id="lJ"></label><input type="text" id="fJ"></div>
+      <div class="fg"><label id="lM"></label><input type="text" id="fM"></div>
+    </div>
+    <div class="fg"><label id="lN"></label><textarea id="fN"></textarea></div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()" id="bCancel"></button>
+      <button class="btn" onclick="doFetch()" id="fBtn" style="display:none"></button>
+      <button class="btn btn-p" onclick="save()" id="bSave"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+const K='sci_track_v6', API='https://tnlkuelk67.execute-api.us-east-1.amazonaws.com/tracker/';
+
+// ── i18n ──
+let lang = localStorage.getItem('sci_lang') || 'cn';
+
+const T = {
+  cn: {
+    title: 'SCI 投稿追踪',
+    syncAll: '🔄 同步全部', exporting: '导出', importing: '导入', adding: '+ 添加投稿',
+    // Statuses
+    st_review: '审稿中', st_complete: '审稿完成', st_submitted: '已投稿',
+    st_decision: '决定中', st_revision: '需修改', st_revised: '已修回',
+    st_accepted: '已接收', st_rejected: '已拒稿', st_withdrawn: '已撤稿',
+    // Bar
+    total: '篇投稿', all: '全部',
+    // Table headers
+    h_status: '状态', h_title: '标题', h_journal: '期刊',
+    h_manuscript: '稿件编号', h_update: '最近更新', h_progress: '审稿进展',
+    // Detail
+    d_journal: '期刊', d_manuscript: '稿件编号', d_submitted: '投稿日期',
+    d_update: '最近更新', d_first: '第一作者', d_corr: '通讯作者',
+    d_review: '审稿进展', d_invited: '发出', d_accepted: '接受', d_completed: '完成',
+    d_add_notes: '点击添加备注…', d_open: '打开追踪页',
+    // Modal
+    m_add: '添加投稿', m_edit: '编辑投稿',
+    m_url: '追踪链接', m_url_ph: '粘贴 Elsevier 追踪链接，自动获取信息',
+    m_url_ok: '✓ 已识别 Elsevier 链接', m_title: '文章标题 *', m_title_ph: '自动获取或手动填写',
+    m_journal: '期刊 *', m_id: '稿件编号', m_notes: '备注', m_notes_ph: '审稿意见、截止日期等',
+    m_cancel: '取消', m_fetch: '获取信息', m_fetching: '获取中…', m_fetched: '✓ 已获取', m_failed: '失败',
+    m_save: '保存',
+    // Empty
+    e_empty: '还没有投稿记录', e_empty_sub: '粘贴 Elsevier 追踪链接即可自动获取信息',
+    e_empty_btn: '+ 添加投稿', e_none: '没有符合条件的记录',
+    // Alerts
+    a_fill: '请填写标题和期刊', a_delete: '确定删除这条记录？',
+    a_no_sync: '没有可同步的记录', a_syncing: '同步中…',
+    a_import_ok: n => `成功导入 ${n} 条`, a_import_err: '文件格式错误',
+    a_sync_fail: '同步失败：',
+    // Prompt
+    p_notes: '备注：',
+    // Date
+    fmt: (ts) => { if(!ts) return '—'; const d=new Date(ts*1000); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; },
+    // Review text
+    d_review_text: (inv,acc,comp) => `审稿进展：发出 <b style="color:var(--text)">${inv}</b> · 接受 <b style="color:var(--text)">${acc}</b> · 完成 <b style="color:var(--text)">${comp}</b>`,
+  },
+  en: {
+    title: 'SCI Submission Tracker',
+    syncAll: '🔄 Sync All', exporting: 'Export', importing: 'Import', adding: '+ Add Submission',
+    st_review: 'Under Review', st_complete: 'Reviews Complete', st_submitted: 'Submitted',
+    st_decision: 'Decision Pending', st_revision: 'Revision Required', st_revised: 'Revised',
+    st_accepted: 'Accepted', st_rejected: 'Rejected', st_withdrawn: 'Withdrawn',
+    total: 'total', all: 'All',
+    h_status: 'Status', h_title: 'Title', h_journal: 'Journal',
+    h_manuscript: 'Manuscript', h_update: 'Last Update', h_progress: 'Progress',
+    d_journal: 'Journal', d_manuscript: 'Manuscript', d_submitted: 'Submitted',
+    d_update: 'Last update', d_first: 'First author', d_corr: 'Corresponding author',
+    d_review: 'Review progress', d_invited: 'invited', d_accepted: 'accepted', d_completed: 'completed',
+    d_add_notes: 'Click to add notes\u2026', d_open: 'Open tracking page',
+    m_add: 'Add Submission', m_edit: 'Edit Submission',
+    m_url: 'Tracking Link', m_url_ph: 'Paste Elsevier tracking URL — info will be fetched automatically',
+    m_url_ok: '\u2713 Elsevier link detected', m_title: 'Title *', m_title_ph: 'Auto-fetched or enter manually',
+    m_journal: 'Journal *', m_id: 'Manuscript ID', m_notes: 'Notes', m_notes_ph: 'Review comments, deadlines, etc.',
+    m_cancel: 'Cancel', m_fetch: 'Fetch Info', m_fetching: 'Fetching\u2026', m_fetched: '\u2713 Done', m_failed: 'Failed',
+    m_save: 'Save',
+    e_empty: 'No submissions yet', e_empty_sub: 'Paste an Elsevier tracking link to get started',
+    e_empty_btn: '+ Add Submission', e_none: 'No matches',
+    a_fill: 'Please fill in title and journal', a_delete: 'Delete this submission?',
+    a_no_sync: 'No auto-syncable submissions', a_syncing: 'Syncing\u2026',
+    a_import_ok: n => `Imported ${n}`, a_import_err: 'Invalid file',
+    a_sync_fail: 'Sync failed: ',
+    p_notes: 'Notes: ',
+    fmt: (ts) => { if(!ts) return '\u2014'; const d=new Date(ts*1000); const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`; },
+    d_review_text: (inv,acc,comp) => `Review progress: <b style="color:var(--text)">${inv}</b> invited \u00b7 <b style="color:var(--text)">${acc}</b> accepted \u00b7 <b style="color:var(--text)">${comp}</b> completed`,
+  }
+};
+
+const t = k => T[lang][k];
+
+// Status mapping
+function st(s) {
+  const cn = { 3:'p-review',4:'p-complete',23:'p-review',2:'p-submitted',5:'p-complete',6:'p-revision',7:'p-submitted',8:'p-accepted',9:'p-rejected',10:'p-submitted' };
+  const labels = { 3:'st_review',4:'st_complete',23:'st_review',2:'st_submitted',5:'st_decision',6:'st_revision',7:'st_revised',8:'st_accepted',9:'st_rejected',10:'st_withdrawn' };
+  return { l: t(labels[s] || 'st_submitted'), c: cn[s] || 'p-submitted' };
+}
+
+let filter='all', expanded={}, sortCol='lastUpdated', sortDir=-1;
+
+// ── Data ──
+function ld(){try{let d=JSON.parse(localStorage.getItem(K));if(!d||!d.length){d=demo();sv(d)}return d}catch{return[]}}
+function sv(d){localStorage.setItem(K,JSON.stringify(d))}
+function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+function days(ts){return ts?Math.floor((Date.now()-ts*1000)/864e5):null}
+function uuid(u){if(!u)return null;const m=u.match(/[?&]uuid=([0-9a-f-]{36})/i)||u.match(/tracker\/([0-9a-f-]{36})/i);return m?m[1]:null}
+async function api(id){const r=await fetch(API+id);if(!r.ok)throw new Error(r.status);return r.json()}
+function toP(d,url){return{title:d.ManuscriptTitle||'',journal:d.JournalName||'',acronym:d.JournalAcronym||'',manuscript:d.PubdNumber||'',firstAuthor:d.FirstAuthor||'',corrAuthor:d.CorrespondingAuthor||'',status:d.Status||0,submitDate:d.SubmissionDate||null,lastUpdated:d.LastUpdated||null,revNum:d.LatestRevisionNumber||0,review:d.ReviewSummary||null,url}}
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('sci_lang', l);
+  document.getElementById('langCn').classList.toggle('active', l==='cn');
+  document.getElementById('langEn').classList.toggle('active', l==='en');
+  // Update static labels
+  document.getElementById('hTitle').textContent = t('title');
+  document.getElementById('rBtn').textContent = t('syncAll');
+  document.getElementById('bExport').textContent = t('exporting');
+  document.getElementById('bImport').textContent = t('importing');
+  document.getElementById('bAdd').textContent = t('adding');
+  render();
+}
+
+// ── Render ──
+function render(){
+  let ps=ld(),all=[...ps];
+  if(filter!=='all')ps=ps.filter(p=>p.status===filter);
+  ps.sort((a,b)=>{let av=a[sortCol]||0,bv=b[sortCol]||0;return(av-bv)*sortDir});
+  rBar(all);rTable(ps);
+}
+
+function rBar(ps){
+  const tot=ps.length, r=ps.filter(p=>st(p.status).c==='p-review').length,
+    c=ps.filter(p=>p.status===4).length, d=ps.filter(p=>[8,9].includes(p.status)).length;
+  document.getElementById('bar').innerHTML=`
+    <span style="font-size:14px;font-weight:700;margin-right:8px">${tot} ${t('total')}</span>
+    <div class="bar-sep"></div>
+    <button class="tab ${filter==='all'?'on':''}" onclick="sf('all')">${t('all')} (${tot})</button>
+    <button class="tab ${filter===3?'on':''}" onclick="sf(3)">${t('st_review')} (${r})</button>
+    <button class="tab ${filter===4?'on':''}" onclick="sf(4)">${t('st_complete')} (${c})</button>
+    <button class="tab ${filter===8?'on':''}" onclick="sf(8)">${t('st_accepted')} (${d})</button>`;
+}
+
+function th(l,c,cls){const ar=sortCol===c?(sortDir===1?' ↑':' ↓'):'';return`<th class="${cls||''} sortable" onclick="ss('${c}')">${l}${ar}</th>`}
+
+function rTable(ps){
+  document.getElementById('hd').innerHTML=`<tr>
+    ${th(t('h_status'),'status','c-st')}${th(t('h_title'),'title','c-title')}${th(t('h_journal'),'journal','c-j')}
+    ${th(t('h_manuscript'),'manuscript','c-id')}${th(t('h_update'),'lastUpdated','c-date')}
+    ${th(t('h_progress'),'rev','c-rev')}<th class="c-act"></th></tr>`;
+
+  const bd=document.getElementById('bd');
+  if(!ps.length&&!ld().length){bd.innerHTML=`<tr><td colspan="7" class="empty"><h3>${t('e_empty')}</h3><p>${t('e_empty_sub')}</p><button class="btn btn-p" onclick="openModal()">${t('e_empty_btn')}</button></td></tr>`;return}
+  if(!ps.length){bd.innerHTML=`<tr><td colspan="7" class="empty"><h3>${t('e_none')}</h3></td></tr>`;return}
+
+  let h='';
+  ps.forEach(p=>{
+    const si=st(p.status),isE=expanded[p.id],rv=p.review;
+    const done=rv?+rv.ReviewsCompleted:0,total=rv?+rv.ReviewInvitationsSent:0;
+    const pct=total?Math.round(done/total*100):0;
+
+    h+=`<tr>
+      <td class="c-st"><span class="pill ${si.c}"><span class="d"></span>${si.l}</span></td>
+      <td class="c-title">
+        <div class="t-main" onclick="tg('${p.id}')">${esc(p.title)}</div>
+        ${p.notes?`<div class="t-notes" onclick="en('${p.id}')">${esc(p.notes)}</div>`:''}
+      </td>
+      <td class="c-j">${esc(p.journal)}</td>
+      <td class="c-id">${esc(p.manuscript)}${p.revNum?` <span class="rev">R${p.revNum}</span>`:''}</td>
+      <td class="c-date">${t('fmt')(p.lastUpdated||p.submitDate)}</td>
+      <td class="c-rev">${rv?`<div class="rev-bar"><span class="rev-num">${done}/${total}</span><div class="rev-track"><div class="rev-fill" style="width:${pct}%"></div></div></div>`:'<span style="color:var(--dim)">—</span>'}</td>
+      <td class="c-act"><div class="act-group">
+        ${uuid(p.url)?`<button class="btn btn-i btn-s" onclick="rp('${p.id}')" title="Sync">🔄</button>`:''}
+        ${p.url?`<a href="${esc(p.url)}" target="_blank" class="btn btn-i btn-s" title="Open">🔗</a>`:''}
+        <button class="btn btn-i btn-s" onclick="om('${p.id}')" title="Edit">✏️</button>
+        <button class="btn btn-i btn-s btn-d" onclick="dp('${p.id}')" title="Delete">✕</button>
+      </div></td>
+    </tr>`;
+
+    if(isE){
+      h+=`<tr class="detail"><td colspan="7"><div class="detail-box">
+        <div class="detail-grid">
+          <div class="di"><span class="dl">${t('d_journal')}:</span><span class="dv">${esc(p.journal)}${p.acronym?' ('+esc(p.acronym)+')':''}</span></div>
+          <div class="di"><span class="dl">${t('d_manuscript')}:</span><span class="dv">${esc(p.manuscript||'\u2014')}${p.revNum?' R'+p.revNum:''}</span></div>
+          <div class="di"><span class="dl">${t('d_submitted')}:</span><span class="dv">${t('fmt')(p.submitDate)}</span></div>
+          <div class="di"><span class="dl">${t('d_update')}:</span><span class="dv">${t('fmt')(p.lastUpdated)}</span></div>
+          ${p.firstAuthor?`<div class="di"><span class="dl">${t('d_first')}:</span><span class="dv">${esc(p.firstAuthor)}</span></div>`:''}
+          ${p.corrAuthor?`<div class="di"><span class="dl">${t('d_corr')}:</span><span class="dv">${esc(p.corrAuthor)}</span></div>`:''}
+        </div>
+        ${rv?`<div style="margin-top:12px;font-size:13px;color:var(--dim)">${t('d_review_text')(rv.ReviewInvitationsSent||0,rv.ReviewInvitationsAccepted||0,rv.ReviewsCompleted||0)}</div>`:''}
+        <div class="detail-notes" onclick="en('${p.id}')">${p.notes?'\u{1F4DD} '+esc(p.notes):'\u{1F4DD} '+t('d_add_notes')}</div>
+        ${p.url?`<div class="detail-link"><a href="${esc(p.url)}" target="_blank">\u{1F517} ${t('d_open')}</a></div>`:''}
+      </div></td></tr>`;
+    }
+  });
+  bd.innerHTML=h;
+}
+
+function tg(id){expanded[id]=!expanded[id];render()}
+function sf(f){filter=f;render()}
+function ss(c){if(sortCol===c)sortDir*=-1;else{sortCol=c;sortDir=-1}render()}
+function en(id){const p=ld().find(x=>x.id===id);const n=prompt(t('p_notes'),p?p.notes||'':'');if(n!==null){p.notes=n.trim();sv(ld().map(x=>x.id===id?p:x));render()}}
+
+// ── Auto-fetch ──
+function onUrl(v){document.getElementById('fHint').style.display=uuid(v)?'':'none';document.getElementById('fBtn').style.display=uuid(v)?'':''}
+async function doFetch(){
+  const url=document.getElementById('fUrl').value.trim(),u=uuid(url);if(!u)return;
+  const btn=document.getElementById('fBtn');btn.textContent=t('m_fetching');
+  try{const d=await api(u);document.getElementById('fTitle').value=d.ManuscriptTitle||'';document.getElementById('fJ').value=d.JournalName||'';document.getElementById('fM').value=d.PubdNumber||'';btn.textContent=t('m_fetched')}
+  catch(e){btn.textContent=t('m_failed');alert(e.message)}
+}
+async function rp(id){
+  const ps=ld(),p=ps.find(x=>x.id===id);if(!p)return;const u=uuid(p.url);if(!u)return;
+  try{const d=await api(u);Object.assign(p,toP(d,p.url));sv(ps);render()}catch(e){alert(t('a_sync_fail')+e.message)}
+}
+async function refreshAll(){
+  const ps=ld(),targets=ps.filter(p=>uuid(p.url));if(!targets.length)return alert(t('a_no_sync'));
+  const btn=document.getElementById('rBtn');btn.textContent=t('a_syncing');btn.disabled=true;
+  await Promise.all(targets.map(async p=>{try{const d=await api(uuid(p.url));Object.assign(p,toP(d,p.url))}catch(e){}}));
+  sv(ps);btn.textContent=t('syncAll');btn.disabled=false;render();
+}
+
+// ── Modal ──
+function openModal(id){
+  document.getElementById('ov').classList.add('show');
+  const p=id?ld().find(x=>x.id===id):null;
+  document.getElementById('mT').textContent=p?t('m_edit'):t('m_add');
+  document.getElementById('eId').value=id||'';
+  document.getElementById('fUrl').value=p?.url||'';
+  document.getElementById('fTitle').value=p?.title||'';
+  document.getElementById('fJ').value=p?.journal||'';
+  document.getElementById('fM').value=p?.manuscript||'';
+  document.getElementById('fN').value=p?.notes||'';
+  // Update modal labels
+  document.getElementById('lUrl').textContent=t('m_url');
+  document.getElementById('fUrl').placeholder=t('m_url_ph');
+  document.getElementById('fHint').textContent=t('m_url_ok');
+  document.getElementById('lTitle').textContent=t('m_title');
+  document.getElementById('fTitle').placeholder=t('m_title_ph');
+  document.getElementById('lJ').textContent=t('m_journal');
+  document.getElementById('lM').textContent=t('m_id');
+  document.getElementById('lN').textContent=t('m_notes');
+  document.getElementById('fN').placeholder=t('m_notes_ph');
+  document.getElementById('bCancel').textContent=t('m_cancel');
+  document.getElementById('fBtn').textContent=t('m_fetch');
+  document.getElementById('bSave').textContent=t('m_save');
+  onUrl(p?.url||'');
+}
+function closeModal(){document.getElementById('ov').classList.remove('show')}
+function save(){
+  const title=document.getElementById('fTitle').value.trim(),journal=document.getElementById('fJ').value.trim();
+  if(!title||!journal)return alert(t('a_fill'));
+  const eid=document.getElementById('eId').value,ps=ld();
+  const d={url:document.getElementById('fUrl').value.trim(),title,journal,manuscript:document.getElementById('fM').value.trim(),notes:document.getElementById('fN').value.trim()};
+  if(eid){const i=ps.findIndex(p=>p.id===eid);if(i>=0)ps[i]={...ps[i],...d}}
+  else ps.push({id:gid(),...d,status:2,submitDate:Math.floor(Date.now()/1000),createdAt:Date.now()});
+  sv(ps);closeModal();render();
+}
+function dp(id){if(!confirm(t('a_delete')))return;sv(ld().filter(p=>p.id!==id));render()}
+
+function exportData(){const b=new Blob([JSON.stringify(ld(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='sci-tracker.json';a.click()}
+function importData(){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d))throw 0;const ex=ld();const ids=new Set(ex.map(p=>p.id));d.forEach(p=>{if(!ids.has(p.id))ex.push(p)});sv(ex);render();alert(t('a_import_ok')(d.length))}catch{alert(t('a_import_err'))}};r.readAsText(f)};i.click()}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+function demo(){return[
+  {id:gid(),title:'Mechanical Enhancement and Microstructural Evolution of Fiber–Binder Stabilized Loess',journal:'Materials & Design',acronym:'JMADE',manuscript:'JMADE-D-25-05309',firstAuthor:'Minghao Deng',corrAuthor:'Wen Wang',status:3,submitDate:1765407286,lastUpdated:1774302424,revNum:1,review:{ReviewsCompleted:'1',ReviewInvitationsAccepted:'1',ReviewInvitationsSent:'2'},url:'https://track.authorhub.elsevier.com/?uuid=5365051a-1d91-4617-b5b4-d11297f8825e',notes:'Reviewer 2 focused on experimental data integrity',createdAt:Date.now()-864e5*3},
+  {id:gid(),title:'Deep Learning Approaches for Multi-Modal Medical Image Segmentation',journal:'Medical Image Analysis',acronym:'MEDIA',manuscript:'MEDIA-2025-1187',status:4,submitDate:1739481600,lastUpdated:1774838400,revNum:0,review:{ReviewsCompleted:'3',ReviewInvitationsAccepted:'3',ReviewInvitationsSent:'3'},url:'',notes:'Awaiting editor decision',createdAt:Date.now()-864e5*30},
+  {id:gid(),title:'Single-Atom Catalysts for CO₂ Electroreduction: A Comprehensive Review',journal:'Chemical Reviews',acronym:'CR',manuscript:'CR-2025-00342',status:8,submitDate:1737331200,lastUpdated:1774060800,revNum:1,review:{ReviewsCompleted:'2',ReviewInvitationsAccepted:'2',ReviewInvitationsSent:'2'},url:'',notes:'Accepted, waiting for proof',createdAt:Date.now()-864e5*60}
+]}
+
+// Init
+setLang(lang);
+</script>
+</body>
+</html>
